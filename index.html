@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Quran Digital — Gradient Hijau</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-start: #064e3b; /* hijau */
+    --bg-end: #000000;   /* hitam */
+    --card: rgba(255,255,255,0.04);
+    --glass: rgba(255,255,255,0.03);
+    --accent: #8aff7a;
+    --latin: #ffea6a; /* kuning */
+    --terjemah: #ff9aa2; /* merah lembut */
+    --verse-num: #66ff66aa;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+  body{
+    background: linear-gradient(180deg,var(--bg-start) 0%, #022c17 40%, var(--bg-end) 100%);
+    color: #dfffe0;
+    padding: 28px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.45));
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 40px rgba(40,255,80,0.04);
+    min-height: calc(100vh - 56px);
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  /* header + navbar */
+  header.top {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .brand {
+    display:flex;align-items:center;gap:12px;
+  }
+  .logo {
+    width:52px;height:52px;border-radius:10px;
+    background: linear-gradient(135deg,#4ade80,#064e3b);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;color:#012a0f;box-shadow:0 6px 18px rgba(0,0,0,0.45) inset;
+  }
+  .brand h1{font-size:1.25rem;margin:0;color:var(--accent)}
+  .brand p{margin:0;font-size:0.85rem;color:rgba(255,255,255,0.8)}
+
+  nav.main {
+    display:flex;gap:8px;align-items:center;
+  }
+  nav.main button {
+    background:transparent;border:1px solid rgba(255,255,255,0.06);
+    color: #e8ffe8;padding:8px 12px;border-radius:8px;font-weight:600;
+    cursor:pointer;backdrop-filter:blur(4px);
+    transition: all 0.3s ease;
+  }
+  nav.main button.active{
+    background:linear-gradient(90deg, rgba(138,255,122,0.12), rgba(200,255,170,0.04));
+    border:1px solid rgba(138,255,122,0.18);
+    box-shadow:0 6px 22px rgba(72,201,92,0.06);
+  }
+  nav.main button:hover:not(.active) {
+    background:rgba(138,255,122,0.08);
+  }
+
+  main.layout {
+    display:grid;
+    grid-template-columns: 360px 1fr;
+    gap:18px;
+    align-items:start;
+    width:100%;
+    flex:1;
+  }
+
+  /* left column: article + controls */
+  .left {
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .article {
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:12px;padding:18px;box-shadow:0 8px 18px rgba(0,0,0,0.4);
+  }
+  .article h2{margin:0;color:var(--accent);font-size:1.05rem}
+  .article p{margin-top:10px;color:rgba(255,255,255,0.85);font-size:0.95rem}
+
+  .controls {
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .select, .select-inline {
+    background:var(--glass);padding:10px;border-radius:10px;color:#e8ffe8;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  select{
+    background:transparent;
+    border:none;
+    color:#e8ffe8;
+    font-weight:600;
+    width:100%;
+    outline:none;
+  }
+  select option {
+    background: #064e3b;
+    color: #e8ffe8;
+    border: none;
+  }
+  .select-inline{display:flex;gap:8px;align-items:center}
+
+  /* right column: content */
+  .content {
+    display:flex;flex-direction:column;gap:12px;
+  }
+  .content .headerContent{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .content h2{margin:0;color:var(--accent)}
+
+  .cards {
+    display:flex;flex-direction:column;gap:12px;
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 8px;
+  }
+
+  /* Custom scrollbar */
+  .cards::-webkit-scrollbar,
+  .content-section::-webkit-scrollbar,
+  .search-results::-webkit-scrollbar {
+    width: 8px;
+  }
+  .cards::-webkit-scrollbar-track,
+  .content-section::-webkit-scrollbar-track,
+  .search-results::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+  }
+  .cards::-webkit-scrollbar-thumb,
+  .content-section::-webkit-scrollbar-thumb,
+  .search-results::-webkit-scrollbar-thumb {
+    background: rgba(138,255,122,0.3);
+    border-radius: 4px;
+  }
+  .cards::-webkit-scrollbar-thumb:hover,
+  .content-section::-webkit-scrollbar-thumb:hover,
+  .search-results::-webkit-scrollbar-thumb:hover {
+    background: rgba(138,255,122,0.5);
+  }
+
+  .juz-card {
+    display:flex;gap:14px;align-items:flex-start;
+    background: rgba(255,255,255,0.02);
+    border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.03);
+    cursor:pointer;transition:transform .18s, box-shadow .18s;
+  }
+  .juz-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+  .juz-num {
+    width:72px;height:72px;border-radius:12px;flex:0 0 72px;
+    display:flex;align-items:center;justify-content:center;font-weight:800;
+    font-size:1.4rem;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    color:var(--accent);
+    border:1px solid rgba(138,255,122,0.08);
+  }
+  .juz-meta h3{margin:0;font-size:1.05rem;color:#eaffea}
+  .juz-meta small{display:block;color:rgba(255,255,255,0.65);margin-top:6px}
+  .juz-meta p{margin-top:8px;color:rgba(255,255,255,0.8);font-size:0.95rem}
+
+  /* content-section (ayat) */
+  .content-section {
+    background: linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.32));
+    padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);
+    max-height:65vh; overflow:auto;
+  }
+  .surah-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .surah-header h3{margin:0;color:var(--accent)}
+  .surah-header .meta{color:rgba(255,255,255,0.75);font-size:0.92rem}
+
+  .ayat {
+    position:relative;padding:14px;border-radius:10px;margin-bottom:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+    border:1px solid rgba(255,255,255,0.02);
+    transition: background 0.3s ease;
+  }
+  .ayat:hover {
+    background: rgba(255,255,255,0.02);
+  }
+  .verse-number{
+    position:absolute;right:12px;top:12px;
+    background:transparent;color:var(--verse-num);font-weight:700;
+    width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  }
+  .arabic {
+    font-family: 'Amiri', serif; font-size:1.9rem;text-align:right;line-height:1.3;color:#e8ffe8;
+    text-shadow:0 0 10px rgba(60,255,90,0.06);
+    margin-right: 40px;
+  }
+  .latin { color: var(--latin); font-style:italic; margin-top:8px; text-align:right; direction:ltr }
+  .terjemahan { color: var(--terjemah); margin-top:8px; text-align:left; direction:ltr }
+  
+  /* Bookmark button */
+  .bookmark-btn {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bookmark-btn:hover {
+    color: var(--accent);
+    background: rgba(138,255,122,0.1);
+    transform: scale(1.1);
+  }
+  .bookmark-btn.bookmarked {
+    color: #ffd700;
+    text-shadow: 0 0 8px rgba(255,215,0,0.3);
+  }
+
+  /* Search section */
+  .search-section {
+    background: linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.32));
+    padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);
+    display: none;
+  }
+  .search-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  .search-input::placeholder {
+    color: rgba(255,255,255,0.5);
+  }
+  .search-results {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  .search-result-item {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .search-result-item:hover {
+    background: rgba(255,255,255,0.05);
+  }
+  .search-result-item .surah-name {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .search-result-item .ayah-text {
+    margin-top: 6px;
+    color: rgba(255,255,255,0.9);
+  }
+
+  /* back button */
+  .back {
+    display:inline-block;padding:8px 12px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);
+    color: #dfffe0;font-weight:600;cursor:pointer;margin-bottom:10px;
+    transition: all 0.3s ease;
+  }
+  .back:hover{
+    background:rgba(138,255,122,0.06);
+    transform: translateX(-2px);
+  }
+
+  /* footer */
+  footer.app-foot {
+    margin-top:12px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.02);
+    display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,0.7);font-size:0.92rem;
+  }
+
+  /* floating switch button and popup */
+  #switchModeBtn{
+    position:fixed;right:24px;bottom:24px;padding:12px 16px;border-radius:12px;background:rgba(0,85,0,0.8);
+    color:var(--accent);font-weight:700;border:none;cursor:pointer;z-index:2000;box-shadow:0 8px 30px rgba(0,0,0,0.6);
+    transition: all 0.3s ease;
+  }
+  #switchModeBtn:hover{
+    background:rgba(0,100,0,0.9);
+    transform: translateY(-2px);
+  }
+  #switchModePopup{
+    position:fixed;right:24px;bottom:76px;background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.5));
+    color:#eaffea;padding:12px;border-radius:10px;border:1px solid rgba(138,255,122,0.08);z-index:2000;display:none;
+    backdrop-filter: blur(10px);
+  }
+  #switchModePopup button{
+    display:block;width:100%;background:transparent;border:none;color:inherit;padding:10px 6px;border-radius:8px;cursor:pointer;text-align:left;
+    transition: background 0.2s ease;
+  }
+  #switchModePopup button:hover{background:rgba(138,255,122,0.04)}
+
+  /* loading */
+  #loading {
+    display:none;
+    color:rgba(255,255,255,0.9);
+    text-align:center;
+    padding: 20px;
+  }
+  .loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: var(--accent);
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* responsive */
+  @media (max-width:980px){
+    main.layout{grid-template-columns:1fr;gap:14px}
+    .left{order:2}
+    .content{order:1}
+    header.top {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    nav.main {
+      width: 100%;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Aplikasi Quran Digital">
+    <header class="top">
+      <div class="brand" aria-hidden="false">
+        <div class="logo" aria-hidden="true">QS</div>
+        <div>
+          <h1>Quran Digital</h1>
+          <p>Gradient Hijau • Arab • Latin • Terjemahan</p>
+        </div>
+      </div>
+
+      <nav class="main" role="navigation" aria-label="Mode">
+        <button id="navSurat" class="active" aria-pressed="true">Surat</button>
+        <button id="navJuz" aria-pressed="false">Juz</button>
+        <button id="navSearch" aria-pressed="false">Pencarian</button>
+        <button id="navBookmark" aria-pressed="false">Bookmark</button>
+      </nav>
+    </header>
+
+    <main class="layout" aria-live="polite">
+      <!-- left column -->
+      <aside class="left" aria-label="Kontrol dan artikel">
+        <section class="article" aria-labelledby="articleTitle">
+          <h2 id="articleTitle">Selamat Datang di Quran Digital</h2>
+          <p>
+            Aplikasi ini memudahkan membaca Al-Qur'an lengkap dengan transliterasi latin dan terjemahan Indonesia.
+            Pilih <strong>Mode Surat</strong> untuk membuka per surat, atau <strong>Mode Juz</strong> untuk melihat daftar surat per juz.
+            Semoga bermanfaat untuk tadabbur dan memperbaiki bacaan.
+          </p>
+        </section>
+
+        <section class="controls" aria-label="Kontrol pembaca">
+          <div class="select">
+            <label for="selectSurat" style="display:block;font-weight:700;margin-bottom:8px">Pilih Surat</label>
+            <select id="selectSurat" aria-label="Pilih Surat"> 
+              <option value="">Memuat daftar surat...</option> 
+            </select>
+          </div>
+          <div class="select" id="juzSelectWrap" style="display:none">
+            <label for="selectJuz" style="display:block;font-weight:700;margin-bottom:8px">Pilih Juz</label>
+            <select id="selectJuz" aria-label="Pilih Juz">
+              <option value="">-- Pilih Juz --</option>
+            </select>
+          </div>
+        </section>
+      </aside>
+
+      <!-- right column -->
+      <section class="content" aria-label="Konten utama">
+        <div class="headerContent">
+          <div>
+            <h2 id="contentTitle">Mode Surat</h2>
+            <div class="meta" id="contentSubtitle" style="color:rgba(255,255,255,0.75);font-size:0.95rem">Pilih surat atau juz untuk mulai membaca</div>
+          </div>
+          <div style="min-width:120px;text-align:right;color:rgba(255,255,255,0.8)">
+            <div style="font-size:0.9rem">Tema: <strong>Gradient Hijau → Hitam</strong></div>
+          </div>
+        </div>
+
+        <!-- Search section -->
+        <div id="searchSection" class="search-section" aria-live="polite" style="display:none">
+          <input type="text" id="searchInput" class="search-input" placeholder="Cari kata atau ayat..." aria-label="Pencarian ayat">
+          <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <!-- Bookmark section -->
+        <div id="bookmarkSection" class="content-section" aria-live="polite" style="display:none">
+          <h3>Ayat Favorit</h3>
+          <div id="bookmarkList"></div>
+        </div>
+
+        <!-- cards (juz view) -->
+        <div id="cardsWrap" class="cards" aria-live="polite" style="display:none"></div>
+
+        <!-- content section (ayat) -->
+        <div id="contentArea" class="content-section" style="display:none">
+          <!-- dynamic -->
+        </div>
+
+        <div id="loading" style="display:none;color:rgba(255,255,255,0.9);text-align:center">
+          <div class="loading-spinner"></div>Memuat...
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-foot" role="contentinfo">
+      <div>© 2025 Quran Digital by <strong>Sidnsix Nothing</strong></div>
+      <div style="opacity:0.9">Sumber data: API Al-Quran.cloud</div>
+    </footer>
+  </div>
+
+  <!-- floating switch button -->
+  <button id="switchModeBtn" aria-haspopup="true" aria-expanded="false" aria-controls="switchModePopup">
+    Mau ganti surat? atau juz? klik ini
+  </button>
+  <div id="switchModePopup" role="menu" aria-hidden="true">
+    <button id="switchToSurat" role="menuitem">Mode Surat</button>
+    <button id="switchToJuz" role="menuitem">Mode Juz</button>
+  </div>
+
+<script>
+/* === State & elements === */
+const navSurat = document.getElementById('navSurat');
+const navJuz = document.getElementById('navJuz');
+const navSearch = document.getElementById('navSearch');
+const navBookmark = document.getElementById('navBookmark');
+const selectSurat = document.getElementById('selectSurat');
+const selectJuz = document.getElementById('selectJuz');
+const juzSelectWrap = document.getElementById('juzSelectWrap');
+const contentTitle = document.getElementById('contentTitle');
+const contentSubtitle = document.getElementById('contentSubtitle');
+const cardsWrap = document.getElementById('cardsWrap');
+const contentArea = document.getElementById('contentArea');
+const loadingEl = document.getElementById('loading');
+const switchModeBtn = document.getElementById('switchModeBtn');
+const switchModePopup = document.getElementById('switchModePopup');
+const switchToSurat = document.getElementById('switchToSurat');
+const switchToJuz = document.getElementById('switchToJuz');
+const searchSection = document.getElementById('searchSection');
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+const bookmarkSection = document.getElementById('bookmarkSection');
+const bookmarkList = document.getElementById('bookmarkList');
+
+let currentMode = 'surat'; // 'surat', 'juz', 'search', 'bookmark'
+let lastJuzShown = null;
+let openedFromJuz = false;
+let scrollPositions = JSON.parse(localStorage.getItem('quranScrollPositions') || '{}');
+let bookmarks = JSON.parse(localStorage.getItem('quranBookmarks') || '[]');
+
+/* === Helpers === */
+function showLoading(on=true){
+  loadingEl.style.display = on ? 'block' : 'none';
+}
+
+function saveScrollPosition(key, position) {
+  scrollPositions[key] = position;
+  localStorage.setItem('quranScrollPositions', JSON.stringify(scrollPositions));
+}
+
+function getScrollPosition(key) {
+  return scrollPositions[key] || 0;
+}
+
+function setModeUI(mode){
+  currentMode = mode;
+  
+  // Reset all sections
+  selectSurat.parentElement.style.display = 'none';
+  juzSelectWrap.style.display = 'none';
+  cardsWrap.style.display = 'none';
+  contentArea.style.display = 'none';
+  searchSection.style.display = 'none';
+  bookmarkSection.style.display = 'none';
+  
+  // Reset active nav buttons
+  navSurat.classList.remove('active'); navSurat.setAttribute('aria-pressed','false');
+  navJuz.classList.remove('active'); navJuz.setAttribute('aria-pressed','false');
+  navSearch.classList.remove('active'); navSearch.setAttribute('aria-pressed','false');
+  navBookmark.classList.remove('active'); navBookmark.setAttribute('aria-pressed','false');
+
+  if(mode === 'surat'){
+    navSurat.classList.add('active'); navSurat.setAttribute('aria-pressed','true');
+    selectSurat.parentElement.style.display = 'block';
+    contentTitle.textContent = 'Mode Surat';
+    contentSubtitle.textContent = 'Pilih surat untuk membaca ayat lengkap';
+  } else if (mode === 'juz') {
+    navJuz.classList.add('active'); navJuz.setAttribute('aria-pressed','true');
+    juzSelectWrap.style.display = 'block';
+    cardsWrap.style.display = 'block';
+    contentTitle.textContent = 'Mode Juz';
+    contentSubtitle.textContent = 'Pilih Juz lalu klik surat di dalam Juz untuk buka ayat';
+    
+    // Restore scroll position for juz view
+    setTimeout(() => {
+      const savedPosition = getScrollPosition('juz');
+      cardsWrap.scrollTop = savedPosition;
+    }, 100);
+  } else if (mode === 'search') {
+    navSearch.classList.add('active'); navSearch.setAttribute('aria-pressed','true');
+    searchSection.style.display = 'block';
+    contentTitle.textContent = 'Pencarian Ayat';
+    contentSubtitle.textContent = 'Cari kata atau ayat dalam Al-Quran';
+    searchInput.focus();
+  } else if (mode === 'bookmark') {
+    navBookmark.classList.add('active'); navBookmark.setAttribute('aria-pressed','true');
+    bookmarkSection.style.display = 'block';
+    contentTitle.textContent = 'Ayat Favorit';
+    contentSubtitle.textContent = 'Ayat yang telah Anda tandai sebagai favorit';
+    displayBookmarks();
+  }
+}
+
+/* === Bookmark Functions === */
+function toggleBookmark(surahNumber, ayahNumber, arabicText, translation) {
+  const bookmarkId = `${surahNumber}:${ayahNumber}`;
+  const existingIndex = bookmarks.findIndex(b => b.id === bookmarkId);
+  
+  if (existingIndex !== -1) {
+    // Remove bookmark
+    bookmarks.splice(existingIndex, 1);
+  } else {
+    // Add bookmark
+    bookmarks.push({
+      id: bookmarkId,
+      surahNumber,
+      ayahNumber,
+      arabicText,
+      translation,
+      dateAdded: new Date().toISOString()
+    });
+  }
+  
+  // Save to localStorage
+  localStorage.setItem('quranBookmarks', JSON.stringify(bookmarks));
+  
+  // Update UI if in bookmark mode
+  if (currentMode === 'bookmark') {
+    displayBookmarks();
+  }
+  
+  return existingIndex === -1; // Return true if bookmarked, false if removed
+}
+
+function displayBookmarks() {
+  if (bookmarks.length === 0) {
+    bookmarkList.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.7)">Belum ada ayat favorit</p>';
+    return;
+  }
+  
+  bookmarkList.innerHTML = '';
+  bookmarks.forEach(bookmark => {
+    const bookmarkEl = document.createElement('div');
+    bookmarkEl.className = 'ayat';
+    bookmarkEl.innerHTML = `
+      <button class="bookmark-btn bookmarked" data-surah="${bookmark.surahNumber}" data-ayah="${bookmark.ayahNumber}">★</button>
+      <div class="verse-number">${bookmark.ayahNumber}</div>
+      <div class="arabic">${bookmark.arabicText}</div>
+      <div class="terjemahan">${bookmark.translation}</div>
+    `;
+    
+    // Add click event to go to the ayat
+    bookmarkEl.addEventListener('click', () => {
+      loadSuratAyat(bookmark.surahNumber, bookmark.ayahNumber);
+    });
+    
+    // Add click event to the bookmark button
+    const btn = bookmarkEl.querySelector('.bookmark-btn');
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const surahNum = parseInt(btn.getAttribute('data-surah'));
+      const ayahNum = parseInt(btn.getAttribute('data-ayah'));
+      toggleBookmark(surahNum, ayahNum, bookmark.arabicText, bookmark.translation);
+      displayBookmarks();
+    });
+    
+    bookmarkList.appendChild(bookmarkEl);
+  });
+}
+
+function isBookmarked(surahNumber, ayahNumber) {
+  return bookmarks.some(b => b.id === `${surahNumber}:${ayahNumber}`);
+}
+
+/* === Initial: load lists === */
+async function loadSuratList(){
+  try{
+    const res = await fetch('https://api.alquran.cloud/v1/surah');
+    const json = await res.json();
+    if(json.code === 200 && Array.isArray(json.data)){
+      selectSurat.innerHTML = '<option value="">-- Pilih Surat --</option>';
+      json.data.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.number;
+        opt.textContent = `${s.number}. ${s.englishName} (${s.name})`;
+        selectSurat.appendChild(opt);
+      });
+    } else {
+      selectSurat.innerHTML = '<option value="">Gagal memuat surat</option>';
+    }
+  }catch(e){
+    selectSurat.innerHTML = '<option value="">Error memuat surat</option>';
+    console.error(e);
+  }
+}
+
+function setupJuzOptions(){
+  selectJuz.innerHTML = '<option value="">-- Pilih Juz --</option>';
+  for(let i=1;i<=30;i++){
+    const o=document.createElement('option'); o.value=i; o.textContent=`Juz ${i}`;
+    selectJuz.appendChild(o);
+  }
+}
+
+/* === Load surat ayat (editions: arab, id, translit) === */
+async function loadSuratAyat(suratNo, scrollToAyah = null){
+  if(!suratNo) return;
+  contentArea.innerHTML = ''; contentArea.style.display = 'block';
+  cardsWrap.style.display = 'none';
+  searchSection.style.display = 'none';
+  bookmarkSection.style.display = 'none';
+  showLoading(true);
+  try{
+    const url = `https://api.alquran.cloud/v1/surah/${suratNo}/editions/quran-simple,id.indonesian,en.transliteration`;
+    const res = await fetch(url);
+    const json = await res.json();
+    if(json.code !== 200 || !Array.isArray(json.data)){
+      throw new Error('API surat tidak valid');
+    }
+    const arabObj = json.data.find(d => d.edition.identifier === 'quran-simple') || json.data[0];
+    const idObj = json.data.find(d => d.edition.identifier === 'id.indonesian') || {ayahs:[]};
+    const trObj = json.data.find(d => d.edition.identifier && d.edition.identifier.includes('transliteration')) || {ayahs:[]};
+
+    contentTitle.innerHTML = `Surat ${arabObj.englishName} (${arabObj.number}) — ${arabObj.name}`;
+    contentSubtitle.textContent = `Jumlah ayat: ${arabObj.numberOfAyahs} • ${arabObj.revelationType}`;
+
+    // header area
+    const header = document.createElement('div'); header.className = 'surah-header';
+    const h3 = document.createElement('h3'); h3.textContent = `${arabObj.englishName} — ${arabObj.name}`;
+    const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = `${arabObj.number} • ${arabObj.revelationType} • ${arabObj.numberOfAyahs} ayat`;
+    header.appendChild(h3); header.appendChild(meta);
+    contentArea.appendChild(header);
+
+    // if opened from Juz, show back button
+    if(openedFromJuz){
+      const backBtn = document.createElement('button'); 
+      backBtn.className='back'; 
+      backBtn.textContent='← Kembali ke daftar Juz';
+      backBtn.onclick = ()=> {
+        openedFromJuz = false;
+        // Save current scroll position before switching
+        saveScrollPosition('juz', cardsWrap.scrollTop);
+        // show list again; reload juz cards if necessary
+        if(lastJuzShown) loadJuzCards(lastJuzShown);
+        contentArea.style.display = 'none';
+        cardsWrap.style.display = 'block';
+      };
+      contentArea.appendChild(backBtn);
+    }
+
+    // ayat list
+    const wrap = document.createElement('div');
+    wrap.style.display='flex';wrap.style.flexDirection='column';wrap.style.gap='10px';
+
+    const arabAyah = arabObj.ayahs || [];
+    const idAyah = idObj.ayahs || [];
+    const trAyah = trObj.ayahs || [];
+
+    arabAyah.forEach((ay, i) => {
+      const ayDiv = document.createElement('div'); ayDiv.className='ayat';
+      const num = document.createElement('div'); num.className='verse-number'; num.textContent = ay.numberInSurah;
+      
+      // Bookmark button
+      const bookmarkBtn = document.createElement('button');
+      bookmarkBtn.className = `bookmark-btn ${isBookmarked(suratNo, ay.numberInSurah) ? 'bookmarked' : ''}`;
+      bookmarkBtn.textContent = isBookmarked(suratNo, ay.numberInSurah) ? '★' : '☆';
+      bookmarkBtn.setAttribute('data-surah', suratNo);
+      bookmarkBtn.setAttribute('data-ayah', ay.numberInSurah);
+      bookmarkBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isNowBookmarked = toggleBookmark(
+          suratNo, 
+          ay.numberInSurah, 
+          ay.text, 
+          (idAyah[i] && idAyah[i].text) ? idAyah[i].text : ''
+        );
+        bookmarkBtn.className = `bookmark-btn ${isNowBookmarked ? 'bookmarked' : ''}`;
+        bookmarkBtn.textContent = isNowBookmarked ? '★' : '☆';
+      });
+      
+      const arabic = document.createElement('div'); arabic.className='arabic'; arabic.innerHTML = ay.text;
+      const latin = document.createElement('div'); latin.className='latin'; latin.textContent = (trAyah[i] && trAyah[i].text) ? trAyah[i].text : '';
+      const terjemah = document.createElement('div'); terjemah.className='terjemahan'; terjemah.textContent = (idAyah[i] && idAyah[i].text) ? idAyah[i].text : '';
+
+      ayDiv.appendChild(bookmarkBtn);
+      ayDiv.appendChild(num);
+      ayDiv.appendChild(arabic);
+      if(latin.textContent) ayDiv.appendChild(latin);
+      ayDiv.appendChild(terjemah);
+      
+      // Add ID for scrolling
+      ayDiv.id = `ayat-${ay.numberInSurah}`;
+      
+      wrap.appendChild(ayDiv);
+    });
+
+    contentArea.appendChild(wrap);
+
+    // Scroll to specific ayat if requested
+    if (scrollToAyah) {
+      setTimeout(() => {
+        const ayatElement = document.getElementById(`ayat-${scrollToAyah}`);
+        if (ayatElement) {
+          ayatElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+
+  }catch(e){
+    contentArea.innerHTML = `<p style="color:#ff9aa2">Gagal memuat surat: ${e.message}</p>`;
+    console.error(e);
+  } finally {
+    showLoading(false);
+  }
+}
+
+/* === Load Juz view and create cards (group by surat inside juz) === */
+async function loadJuzCards(juzNo){
+  if(!juzNo) return;
+  lastJuzShown = juzNo;
+  openedFromJuz = false;
+  contentArea.style.display = 'none';
+  searchSection.style.display = 'none';
+  bookmarkSection.style.display = 'none';
+  cardsWrap.innerHTML = '';
+  cardsWrap.style.display = 'block';
+  showLoading(true);
+  try{
+    // fetch juz arab edition to get ayah.surah info for grouping
+    const res = await fetch(`https://api.alquran.cloud/v1/juz/${juzNo}/quran-simple`);
+    const json = await res.json();
+    if(json.code !== 200 || !json.data || !Array.isArray(json.data.ayahs)) throw new Error('API Juz tidak valid');
+    const ayahs = json.data.ayahs;
+
+    // group unique surah numbers in order
+    const grouped = {};
+    const order = [];
+    ayahs.forEach(a => {
+      const s = a.surah.number;
+      if(!grouped[s]){
+        grouped[s] = { name: a.surah.name, eng: a.surah.englishName, type: a.surah.revelationType, ayahsCount: a.surah.numberOfAyahs };
+        order.push(s);
+      }
+    });
+
+    // header
+    contentTitle.textContent = `Juz ${juzNo}`;
+    contentSubtitle.textContent = `Daftar surat yang ada dalam Juz ${juzNo}`;
+
+    // create card per surah
+    order.forEach(sNum => {
+      const g = grouped[sNum];
+      const card = document.createElement('div'); card.className='juz-card';
+      card.tabIndex = 0;
+      card.setAttribute('role','button');
+      card.setAttribute('aria-label', `Buka surat ${g.eng}`);
+      const numBox = document.createElement('div'); numBox.className='juz-num'; numBox.textContent = sNum;
+      const metaDiv = document.createElement('div'); metaDiv.className='juz-meta';
+      const title = document.createElement('h3'); title.textContent = `${g.eng} — ${g.name}`;
+      const small = document.createElement('small'); small.textContent = `${g.type} • ${g.ayahsCount} ayat`;
+      const desc = document.createElement('p'); desc.textContent = `Klik untuk membuka Surat ${g.eng} (${sNum}) dan membaca ayat lengkap.`;
+      metaDiv.appendChild(title); metaDiv.appendChild(small); metaDiv.appendChild(desc);
+      card.appendChild(numBox); card.appendChild(metaDiv);
+
+      // click opens surat content (fetch editions)
+      card.addEventListener('click', async ()=> {
+        // Save scroll position before leaving
+        saveScrollPosition('juz', cardsWrap.scrollTop);
+        openedFromJuz = true;
+        cardsWrap.style.display = 'none';
+        contentArea.style.display = 'block';
+        await loadSuratAyat(sNum);
+      });
+      // keyboard support
+      card.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); card.click(); }});
+
+      cardsWrap.appendChild(card);
+    });
+
+    // Restore scroll position after cards are loaded
+    setTimeout(() => {
+      const savedPosition = getScrollPosition('juz');
+      cardsWrap.scrollTop = savedPosition;
+    }, 100);
+
+  }catch(e){
+    cardsWrap.innerHTML = `<p style="color:#ff9aa2">Gagal memuat juz: ${e.message}</p>`;
+    console.error(e);
+  } finally {
+    showLoading(false);
+  }
+}
+
+/* === Search functionality === */
+async function performSearch(query) {
+  if (!query || query.length < 2) {
+    searchResults.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.7)">Masukkan minimal 2 karakter untuk pencarian</p>';
+    return;
+  }
+  
+  showLoading(true);
+  try {
+    // Search in Indonesian translation
+    const res = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/id.indonesian`);
+    const json = await res.json();
+    
+    searchResults.innerHTML = '';
+    
+    if (json.code === 200 && json.data && json.data.matches && json.data.matches.length > 0) {
+      json.data.matches.forEach(match => {
+        const resultItem = document.createElement('div');
+        resultItem.className = 'search-result-item';
+        resultItem.innerHTML = `
+          <div class="surah-name">${match.surah.englishName} (${match.surah.name}) - Ayat ${match.numberInSurah}</div>
+          <div class="ayah-text">${match.text}</div>
+        `;
+        
+        resultItem.addEventListener('click', () => {
+          loadSuratAyat(match.surah.number, match.numberInSurah);
+        });
+        
+        searchResults.appendChild(resultItem);
+      });
+    } else {
+      searchResults.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.7)">Tidak ditemukan hasil pencarian</p>';
+    }
+  } catch (e) {
+    searchResults.innerHTML = '<p style="text-align:center;color:#ff9aa2">Error saat melakukan pencarian</p>';
+    console.error(e);
+  } finally {
+    showLoading(false);
+  }
+}
+
+/* === Event wiring === */
+navSurat.addEventListener('click', ()=> { setModeUI('surat'); });
+navJuz.addEventListener('click', ()=> { setModeUI('juz'); });
+navSearch.addEventListener('click', ()=> { setModeUI('search'); });
+navBookmark.addEventListener('click', ()=> { setModeUI('bookmark'); });
+
+selectSurat.addEventListener('change', ()=> {
+  const v = selectSurat.value;
+  if(v) { setModeUI('surat'); loadSuratAyat(v); }
+});
+selectJuz.addEventListener('change', ()=> {
+  const v = selectJuz.value;
+  if(v) { setModeUI('juz'); loadJuzCards(v); }
+});
+
+// Search input handler
+let searchTimeout;
+searchInput.addEventListener('input', (e) => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    performSearch(e.target.value);
+  }, 500);
+});
+
+// Save scroll position when scrolling in juz view
+cardsWrap.addEventListener('scroll', () => {
+  if (currentMode === 'juz') {
+    saveScrollPosition('juz', cardsWrap.scrollTop);
+  }
+});
+
+/* floating switch button popup */
+switchModeBtn.addEventListener('click', (e)=>{
+  const open = switchModePopup.style.display === 'block';
+  switchModePopup.style.display = open ? 'none' : 'block';
+  switchModeBtn.setAttribute('aria-expanded', String(!open));
+});
+switchToSurat.addEventListener('click', ()=>{ setModeUI('surat'); switchModePopup.style.display='none'; switchModeBtn.setAttribute('aria-expanded','false'); });
+switchToJuz.addEventListener('click', ()=>{ setModeUI('juz'); switchModePopup.style.display='none'; switchModeBtn.setAttribute('aria-expanded','false'); });
+
+/* click outside closes popup */
+document.addEventListener('click', (ev)=>{
+  if(!switchModePopup.contains(ev.target) && ev.target !== switchModeBtn){
+    switchModePopup.style.display = 'none';
+    switchModeBtn.setAttribute('aria-expanded','false');
+  }
+});
+
+/* initial load */
+(async function init(){
+  setModeUI('surat');
+  showLoading(true);
+  await loadSuratList();
+  setupJuzOptions();
+  showLoading(false);
+})();
+</script>
+</body>
+</html>
